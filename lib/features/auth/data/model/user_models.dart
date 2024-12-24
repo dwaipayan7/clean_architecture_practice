@@ -25,6 +25,19 @@ class UserModel extends User {
     );
   }
 
+  // CopyWith method
+  UserModel copyWith({
+    String? id,
+    String? email,
+    String? password,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      password: password ?? this.password,
+    );
+  }
+
   // Overrides the toString method
   @override
   String toString() {
