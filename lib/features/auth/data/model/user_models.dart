@@ -1,4 +1,6 @@
-import 'package:clean_architecture/features/auth/domain/entities/user.dart';
+
+
+import '../../../../cors/common/entities/user.dart';
 
 class UserModel extends User {
   UserModel({
@@ -19,9 +21,9 @@ class UserModel extends User {
   // Creates a UserModel from JSON
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'] as String,
-      email: json['email'] as String,
-      password: json['password'] as String,
+      id: json['id'] ?? '',
+      email: json['email'] ?? '',
+      password: json['password'] ?? '',
     );
   }
 
@@ -41,6 +43,6 @@ class UserModel extends User {
   // Overrides the toString method
   @override
   String toString() {
-    return 'UserModel(id: $id, email: $email, password: $password)';
+    return 'UserModel(id: $id, email: $email, password: $password,)';
   }
 }

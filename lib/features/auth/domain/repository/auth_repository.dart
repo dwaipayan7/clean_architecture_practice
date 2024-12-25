@@ -1,6 +1,7 @@
 import 'package:clean_architecture/cors/error/failure.dart';
-import 'package:clean_architecture/features/auth/domain/entities/user.dart';
 import 'package:fpdart/fpdart.dart';
+
+import '../../../../cors/common/entities/user.dart';
 
 abstract interface class AuthRepository {
   Future<Either<Failure, User>> signupWithEmailPassword({

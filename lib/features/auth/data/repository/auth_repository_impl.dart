@@ -1,7 +1,7 @@
+import 'package:clean_architecture/cors/common/entities/user.dart';
 import 'package:clean_architecture/cors/error/exception.dart';
 import 'package:clean_architecture/cors/error/failure.dart';
 import 'package:clean_architecture/features/auth/data/datasources/auth_remote_datasource.dart';
-import 'package:clean_architecture/features/auth/domain/entities/user.dart';
 import 'package:clean_architecture/features/auth/domain/repository/auth_repository.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:supabase/supabase.dart' as sb;
