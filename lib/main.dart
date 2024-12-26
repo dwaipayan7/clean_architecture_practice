@@ -2,6 +2,7 @@ import 'package:clean_architecture/cors/common/widgets/cubits/app_user_cubit.dar
 import 'package:clean_architecture/cors/theme/theme.dart';
 import 'package:clean_architecture/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:clean_architecture/features/auth/presentation/pages/login_page.dart';
+import 'package:clean_architecture/features/blogs/presentation/pages/blog_page.dart';
 import 'package:clean_architecture/init_dependency.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -52,7 +53,7 @@ class _MyAppState extends State<MyApp> {
         builder: (context, isLoggedIn) {
 
           if(isLoggedIn){
-            return Scaffold(body: Center(child: Text("Logged In"),));
+            return BlogPage();
           }
 
           return LoginPage();
