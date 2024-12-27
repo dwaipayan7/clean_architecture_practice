@@ -1,7 +1,10 @@
+import 'dart:io';
+import 'dart:math';
+
+import 'package:clean_architecture/cors/utils/pick_image.dart';
 import 'package:clean_architecture/features/blogs/presentation/widgets/blog_editor.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
-
 import '../../../../cors/theme/app_pallete.dart';
 
 class AddNewBlog extends StatefulWidget {
@@ -13,10 +16,19 @@ class AddNewBlog extends StatefulWidget {
 }
 
 class _AddNewBlogState extends State<AddNewBlog> {
-
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   List<String> selectedTopics = [];
+  File? image;
+
+  void selectImage() async {
+    final pickedImage = await pickImage();
+    if (pickedImage != null) {
+      setState(() {
+        image = pickedImage;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -37,34 +49,56 @@ class _AddNewBlogState extends State<AddNewBlog> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              DottedBorder(
-                color: AppPallete.borderColor,
-                dashPattern: [10, 4],
-                radius: Radius.circular(10),
-                borderType: BorderType.RRect,
-                strokeCap: StrokeCap.round,
-                child: SizedBox(
-                  height: 150,
-                  width: double.infinity,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.folder_open,
-                        size: 40,
+              image != null
+                  ? GestureDetector(
+                    onTap: (){
+                      selectImage();
+                    },
+                    child: SizedBox(
+                        height: 150,
+                        width: double.infinity,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.file(image!,
+                          fit: BoxFit.cover,),
+                        ),
                       ),
-                      SizedBox(
-                        height: 15,
+                  )
+                  : GestureDetector(
+                      onTap: () {
+                        selectImage();
+                      },
+                      child: DottedBorder(
+                        color: AppPallete.borderColor,
+                        dashPattern: [10, 4],
+                        radius: Radius.circular(10),
+                        borderType: BorderType.RRect,
+                        strokeCap: StrokeCap.round,
+                        child: SizedBox(
+                          height: 150,
+                          width: double.infinity,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.folder_open,
+                                size: 40,
+                              ),
+                              SizedBox(
+                                height: 15,
+                              ),
+                              Text(
+                                "Select your image",
+                                style: TextStyle(fontSize: 15),
+                              )
+                            ],
+                          ),
+                        ),
                       ),
-                      Text(
-                        "Select your image",
-                        style: TextStyle(fontSize: 15),
-                      )
-                    ],
-                  ),
-                ),
+                    ),
+              SizedBox(
+                height: 20,
               ),
-              SizedBox(height: 20,),
               SingleChildScrollView(
                 physics: BouncingScrollPhysics(),
                 scrollDirection: Axis.horizontal,
@@ -79,10 +113,10 @@ class _AddNewBlogState extends State<AddNewBlog> {
                         (e) => Padding(
                           padding: const EdgeInsets.all(5.0),
                           child: GestureDetector(
-                            onTap: (){
-                              if(selectedTopics.contains(e)){
+                            onTap: () {
+                              if (selectedTopics.contains(e)) {
                                 selectedTopics.remove(e);
-                              }else{
+                              } else {
                                 selectedTopics.add(e);
                               }
                               setState(() {
@@ -91,10 +125,13 @@ class _AddNewBlogState extends State<AddNewBlog> {
                             },
                             child: Chip(
                               label: Text(e),
-                              color: selectedTopics.contains(e) ? const MaterialStatePropertyAll(AppPallete.gradient1) : null,
-                              side: selectedTopics.contains(e) ? null : BorderSide(
-                                color: AppPallete.borderColor
-                              ),
+                              color: selectedTopics.contains(e)
+                                  ? const MaterialStatePropertyAll(
+                                      AppPallete.gradient1)
+                                  : null,
+                              side: selectedTopics.contains(e)
+                                  ? null
+                                  : BorderSide(color: AppPallete.borderColor),
                             ),
                           ),
                         ),
@@ -102,11 +139,15 @@ class _AddNewBlogState extends State<AddNewBlog> {
                       .toList(),
                 ),
               ),
-              SizedBox(height: 10,),
+              SizedBox(
+                height: 10,
+              ),
               BlogEditor(controller: _titleController, hintText: 'Blog Title'),
-              SizedBox(height: 10,),
-              BlogEditor(controller: _contentController, hintText: 'Blog Content'),
-        
+              SizedBox(
+                height: 10,
+              ),
+              BlogEditor(
+                  controller: _contentController, hintText: 'Blog Content'),
             ],
           ),
         ),
