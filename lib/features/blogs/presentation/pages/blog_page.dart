@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class BlogPage extends StatelessWidget {
+  static route() => MaterialPageRoute(builder: (context) => BlogPage());
   const BlogPage({super.key});
 
   @override
@@ -16,7 +17,7 @@ class BlogPage extends StatelessWidget {
         actions: [
           IconButton(
               onPressed: (){
-                Navigator.push(context, AddNewBlog.route());
+                Navigator.push(context, AddNewBlogPage.route());
               },
               icon: Icon(CupertinoIcons.add_circled)
           )

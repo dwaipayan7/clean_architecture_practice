@@ -1,23 +1,34 @@
 import 'dart:io';
-import 'dart:math';
 
-import 'package:clean_architecture/cors/utils/pick_image.dart';
-import 'package:clean_architecture/features/blogs/presentation/widgets/blog_editor.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
-import '../../../../cors/theme/app_pallete.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class AddNewBlog extends StatefulWidget {
-  static route() => MaterialPageRoute(builder: (context) => AddNewBlog());
-  const AddNewBlog({super.key});
+import '../../../../cors/common/widgets/cubits/app_user_cubit.dart';
+import '../../../../cors/common/widgets/loader.dart';
+import '../../../../cors/constants/constants.dart';
+import '../../../../cors/theme/app_pallete.dart';
+import '../../../../cors/utils/pick_image.dart';
+import '../../../../cors/utils/show_snackbar.dart';
+import '../bloc/blog_bloc.dart';
+import '../widgets/blog_editor.dart';
+import 'blog_page.dart';
+
+class AddNewBlogPage extends StatefulWidget {
+  static route() => MaterialPageRoute(
+    builder: (context) => const AddNewBlogPage(),
+  );
+  const AddNewBlogPage({super.key});
 
   @override
-  State<AddNewBlog> createState() => _AddNewBlogState();
+  State<AddNewBlogPage> createState() => _AddNewBlogPageState();
 }
 
-class _AddNewBlogState extends State<AddNewBlog> {
-  final _titleController = TextEditingController();
-  final _contentController = TextEditingController();
+class _AddNewBlogPageState extends State<AddNewBlogPage> {
+  final titleController = TextEditingController();
+  final contentController = TextEditingController();
+  final formKey = GlobalKey<FormState>();
   List<String> selectedTopics = [];
   File? image;
 
@@ -30,127 +41,167 @@ class _AddNewBlogState extends State<AddNewBlog> {
     }
   }
 
+  void uploadBlog() {
+    if (formKey.currentState!.validate() &&
+        selectedTopics.isNotEmpty &&
+        image != null) {
+      final posterId =
+          (context.read<AppUserCubit>().state as AppUserLoggedIn).user.id;
+      context.read<BlogBloc>().add(
+        BlogUpload(
+          posterId: posterId,
+          title: titleController.text.trim(),
+          content: contentController.text.trim(),
+          image: image!,
+          topics: selectedTopics,
+        ),
+      );
+    }
+  }
+
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
-    _titleController.dispose();
-    _contentController.dispose();
+    titleController.dispose();
+    contentController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.done_rounded))],
+        actions: [
+          IconButton(
+            onPressed: () {
+              uploadBlog();
+            },
+            icon: const Icon(Icons.done_rounded),
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              image != null
-                  ? GestureDetector(
-                    onTap: (){
-                      selectImage();
-                    },
-                    child: SizedBox(
-                        height: 150,
+      body: BlocConsumer<BlogBloc, BlogState>(
+        listener: (context, state) {
+          if (state is BlogFailure) {
+            showSnackBar(context, state.error);
+          } else if (state is BlogSuccess) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              BlogPage.route(),
+                  (route) => false,
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state is BlogLoading) {
+            return const Loader();
+          }
+
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: formKey,
+                child: Column(
+                  children: [
+                    image != null
+                        ? GestureDetector(
+                      onTap: selectImage,
+                      child: SizedBox(
                         width: double.infinity,
+                        height: 150,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(10),
-                          child: Image.file(image!,
-                          fit: BoxFit.cover,),
+                          child: Image.file(
+                            image!,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
-                  )
-                  : GestureDetector(
+                    )
+                        : GestureDetector(
                       onTap: () {
                         selectImage();
                       },
                       child: DottedBorder(
                         color: AppPallete.borderColor,
-                        dashPattern: [10, 4],
-                        radius: Radius.circular(10),
+                        dashPattern: const [10, 4],
+                        radius: const Radius.circular(10),
                         borderType: BorderType.RRect,
                         strokeCap: StrokeCap.round,
-                        child: SizedBox(
+                        child: Container(
                           height: 150,
                           width: double.infinity,
-                          child: Column(
+                          child: const Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
                                 Icons.folder_open,
                                 size: 40,
                               ),
-                              SizedBox(
-                                height: 15,
-                              ),
+                              SizedBox(height: 15),
                               Text(
-                                "Select your image",
-                                style: TextStyle(fontSize: 15),
-                              )
+                                'Select your image',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                ),
+                              ),
                             ],
                           ),
                         ),
                       ),
                     ),
-              SizedBox(
-                height: 20,
-              ),
-              SingleChildScrollView(
-                physics: BouncingScrollPhysics(),
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    'Technology',
-                    'Business',
-                    'Programming',
-                    'Entertainment',
-                  ]
-                      .map(
-                        (e) => Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: GestureDetector(
-                            onTap: () {
-                              if (selectedTopics.contains(e)) {
-                                selectedTopics.remove(e);
-                              } else {
-                                selectedTopics.add(e);
-                              }
-                              setState(() {
-                                print(selectedTopics);
-                              });
-                            },
-                            child: Chip(
-                              label: Text(e),
-                              color: selectedTopics.contains(e)
-                                  ? const MaterialStatePropertyAll(
-                                      AppPallete.gradient1)
-                                  : null,
-                              side: selectedTopics.contains(e)
-                                  ? null
-                                  : BorderSide(color: AppPallete.borderColor),
+                    const SizedBox(height: 20),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: Constants.topics
+                            .map(
+                              (e) => Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: GestureDetector(
+                              onTap: () {
+                                if (selectedTopics.contains(e)) {
+                                  selectedTopics.remove(e);
+                                } else {
+                                  selectedTopics.add(e);
+                                }
+                                setState(() {});
+                              },
+                              child: Chip(
+                                label: Text(e),
+                                color: selectedTopics.contains(e)
+                                    ? const MaterialStatePropertyAll(
+                                  AppPallete.gradient1,
+                                )
+                                    : null,
+                                side: selectedTopics.contains(e)
+                                    ? null
+                                    : const BorderSide(
+                                  color: AppPallete.borderColor,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      )
-                      .toList(),
+                        )
+                            .toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    BlogEditor(
+                      controller: titleController,
+                      hintText: 'Blog title',
+                    ),
+                    const SizedBox(height: 10),
+                    BlogEditor(
+                      controller: contentController,
+                      hintText: 'Blog content',
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(
-                height: 10,
-              ),
-              BlogEditor(controller: _titleController, hintText: 'Blog Title'),
-              SizedBox(
-                height: 10,
-              ),
-              BlogEditor(
-                  controller: _contentController, hintText: 'Blog Content'),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
