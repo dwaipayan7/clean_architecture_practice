@@ -13,4 +13,10 @@ class BlogFailure extends BlogState{
   BlogFailure({required this.error});
 }
 
-class BlogSuccess extends BlogState{}
+class BlogUploadSuccess extends BlogState{}
+
+class BlogDisplaySuccess extends BlogState{
+  final List<Blog> blogs;
+
+  BlogDisplaySuccess({required this.blogs});
+}

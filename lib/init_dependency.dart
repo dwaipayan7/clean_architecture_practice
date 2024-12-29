@@ -9,6 +9,7 @@ import 'package:clean_architecture/features/auth/presentation/bloc/auth_bloc.dar
 import 'package:clean_architecture/features/blogs/data/datasources/blog_remote_data_source.dart';
 import 'package:clean_architecture/features/blogs/data/repostiroy/blog_repository_impl.dart';
 import 'package:clean_architecture/features/blogs/domain/repository/blog_repository.dart';
+import 'package:clean_architecture/features/blogs/domain/usecase/get_all_blogs.dart';
 import 'package:clean_architecture/features/blogs/domain/usecase/upload_blog.dart';
 import 'package:clean_architecture/features/blogs/presentation/bloc/blog_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -94,10 +95,16 @@ void _initBlog() {
         blogRepository: serviceLocator(),
       ),
     )
+    ..registerFactory(
+      () => GetAllBlogs(
+        repository: serviceLocator(),
+      ),
+    )
     //bloc
     ..registerLazySingleton(
       () => BlogBloc(
-        serviceLocator(),
+        uploadBlog: serviceLocator(),
+        getAllBlogs: serviceLocator(),
       ),
     );
 }
