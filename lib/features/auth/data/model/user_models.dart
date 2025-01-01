@@ -1,48 +1,29 @@
-
-
 import '../../../../cors/common/entities/user.dart';
 
 class UserModel extends User {
   UserModel({
     required super.id,
     required super.email,
-    required super.password,
+    required super.name,
   });
 
-  // Converts UserModel to JSON
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'email': email,
-      'password': password,
-    };
-  }
-
-  // Creates a UserModel from JSON
-  factory UserModel.fromJson(Map<String, dynamic> json) {
+  factory UserModel.fromJson(Map<String, dynamic> map) {
     return UserModel(
-      id: json['id'] ?? '',
-      email: json['email'] ?? '',
-      password: json['password'] ?? '',
+      id: map['id'] ?? '',
+      email: map['email'] ?? '',
+      name: map['name'] ?? '',
     );
   }
 
-  // CopyWith method
   UserModel copyWith({
     String? id,
     String? email,
-    String? password,
+    String? name,
   }) {
     return UserModel(
       id: id ?? this.id,
       email: email ?? this.email,
-      password: password ?? this.password,
+      name: name ?? this.name,
     );
-  }
-
-  // Overrides the toString method
-  @override
-  String toString() {
-    return 'UserModel(id: $id, email: $email, password: $password,)';
   }
 }

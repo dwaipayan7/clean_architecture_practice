@@ -1,7 +1,8 @@
 import 'dart:io';
-
 import 'package:clean_architecture/cors/error/exception.dart';
 import 'package:clean_architecture/cors/error/failure.dart';
+import 'package:clean_architecture/cors/network/connection_checker.dart';
+import 'package:clean_architecture/features/blogs/data/datasources/blog_local_data_source.dart';
 import 'package:clean_architecture/features/blogs/data/datasources/blog_remote_data_source.dart';
 import 'package:clean_architecture/features/blogs/data/models/blog_model.dart';
 import 'package:clean_architecture/features/blogs/domain/entities/blog.dart';
@@ -11,8 +12,10 @@ import 'package:uuid/uuid.dart';
 
 class BlogRepositoryImpl implements BlogRepository {
   final BlogRemoteDataSource blogRemoteDataSource;
+  final BlogLocalDataSource blogLocalDataSource;
+  final ConnectionChecker connectionChecker;
 
-  BlogRepositoryImpl({required this.blogRemoteDataSource});
+  BlogRepositoryImpl(this.blogLocalDataSource, this.connectionChecker, {required this.blogRemoteDataSource});
   @override
   Future<Either<Failure, Blog>> uploadBlog({
     required File image,
@@ -22,6 +25,9 @@ class BlogRepositoryImpl implements BlogRepository {
     required List<String> topics,
   }) async {
     try {
+      if(!await (connectionChecker.isConnected)){
+        return Either.left(Failure("No internet connection"));
+      }
       BlogModel blogModel = BlogModel(
         id: const Uuid().v1(),
         posterId: posterId,
@@ -54,7 +60,13 @@ class BlogRepositoryImpl implements BlogRepository {
    
     try{
 
+      if(!await (connectionChecker.isConnected)){
+          final blogs = blogLocalDataSource.loadBlogs();
+          return Either.right(blogs);
+      }
+
       final blogs = await blogRemoteDataSource.getAllBlogs();
+      blogLocalDataSource.uploadLocalBlogs(blogs: blogs);
 
       return Either.right(blogs);
       
